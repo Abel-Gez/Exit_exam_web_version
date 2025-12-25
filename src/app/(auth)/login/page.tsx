@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import { useAuthStore } from "@/store/auth-store";
+import { SubmitHandler } from "react-hook-form";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -20,7 +21,7 @@ const loginSchema = z.object({
   remember: z.boolean().default(true),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginFormValues = z.input<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function LoginPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<z.infer<typeof loginSchema>>({
+  } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -48,10 +49,12 @@ export default function LoginPage() {
     }
   }, [firebaseUser, initializing, router]);
 
-  const onSubmit = async (values: LoginFormValues) => {
+  const onSubmit: SubmitHandler<LoginFormValues> = async (values) => {
     setLoading(true);
     setError(null);
+
     const result = await signInWithEmail(values.email, values.password);
+
     setLoading(false);
     if (!result.success) {
       setError(result.message);
