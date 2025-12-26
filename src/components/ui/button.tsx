@@ -1,39 +1,70 @@
-"use client";
-
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
-type ButtonVariant = "primary" | "secondary" | "ghost";
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors " +
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 " +
+    "disabled:pointer-events-none disabled:opacity-50 ring-offset-background",
+  {
+    variants: {
+      variant: {
+        default: "bg-blue-600 text-white hover:bg-blue-700",
+        primary: "bg-blue-600 text-white hover:bg-blue-700",
+        secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200",
+        outline:
+          "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50",
+        ghost: "hover:bg-slate-100 text-slate-900",
+        destructive: "bg-red-600 text-white hover:bg-red-700",
+        link: "text-blue-600 underline-offset-4 hover:underline bg-transparent",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+      block: {
+        true: "w-full",
+        false: "",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+      block: false,
+    },
+  }
+);
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: ButtonVariant;
-  block?: boolean;
-};
+export type ButtonVariant = NonNullable<
+  VariantProps<typeof buttonVariants>["variant"]
+>;
+export type ButtonSize = NonNullable<
+  VariantProps<typeof buttonVariants>["size"]
+>;
 
-const baseStyles =
-  "inline-flex items-center justify-center rounded-full text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
 
-const variants: Record<ButtonVariant, string> = {
-  primary: "bg-blue-600 text-white hover:bg-blue-700 focus-visible:outline-blue-600",
-  secondary: "bg-white text-blue-600 shadow hover:bg-blue-50 focus-visible:outline-blue-600",
-  ghost: "bg-transparent text-blue-600 hover:bg-blue-50 focus-visible:outline-blue-600",
-};
-
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = "primary", block, className, ...props }, ref) => (
-    <button
-      ref={ref}
-      className={cn(
-        baseStyles,
-        variants[variant],
-        block ? "w-full" : undefined,
-        "px-5 py-3",
-        className,
-      )}
-      {...props}
-    />
-  ),
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, block, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return (
+      <Comp
+        ref={ref}
+        className={cn(buttonVariants({ variant, size, block, className }))}
+        {...props}
+      />
+    );
+  }
 );
 
 Button.displayName = "Button";
+
+export { Button, buttonVariants };

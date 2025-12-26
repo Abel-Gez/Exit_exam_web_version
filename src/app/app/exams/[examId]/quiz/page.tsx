@@ -91,7 +91,13 @@ export default function QuizPage() {
         correctAnswers,
         totalQuestions: questions.length,
       });
-      await updateUserStats(params.examId as string, finalScore);
+      await updateUserStats({
+        examId: params.examId as string,
+        score: finalScore,
+        correctCount: correctAnswers,
+        wrongCount: questions.length - correctAnswers,
+        totalQuestions: questions.length,
+      });
     } catch (err) {
       console.error("Error saving attempt:", err);
     }
